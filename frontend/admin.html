@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · Task Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="app role-admin" data-role="admin">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><span class="logo">TM</span> Task Manager</div>
+
+    <div class="nav-label">Workspace</div>
+    <a class="nav-item active" href="#dashboard" data-view="dashboard"><i data-icon="home"></i> Dashboard</a>
+    <a class="nav-item" href="#tasks"><i data-icon="list"></i> All tasks <span class="count" data-count="all">0</span></a>
+    <a class="nav-item" href="#" data-action="new"><i data-icon="plus-circle"></i> Create task</a>
+
+    <div class="nav-label">Administration</div>
+    <a class="nav-item" href="#users" data-view="users"><i data-icon="users"></i> Users <span class="count" data-user-count>0</span></a>
+    <a class="nav-item" href="#reports" data-view="reports"><i data-icon="chart"></i> Reports</a>
+
+    <div class="sidebar-footer">
+      <div class="profile">
+        <div class="avatar" data-initials></div>
+        <div>
+          <div class="profile-name" data-username>…</div>
+          <div class="profile-role">Administrator</div>
+        </div>
+      </div>
+      <button class="logout-btn" data-logout><i data-icon="logout"></i> Logout</button>
+    </div>
+  </aside>
+  <div class="backdrop" id="backdrop"></div>
+
+  <!-- ===== Main ===== -->
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menu-btn" aria-label="Open menu"><i data-icon="menu"></i></button>
+      <label class="search"><i data-icon="search"></i><input id="search" type="search" placeholder="Search tasks…" /></label>
+      <div class="topbar-right">
+        <span class="role-pill"><i data-icon="shield"></i> Admin</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- ================= DASHBOARD VIEW ================= -->
+      <div class="view" data-view-panel="dashboard">
+      <section class="hero">
+        <div>
+          <h1 data-greeting>Welcome back</h1>
+          <p>Here's what's happening across your team today.</p>
+        </div>
+        <button class="btn btn-primary" data-action="new"><i data-icon="plus"></i> New task</button>
+      </section>
+
+      <section class="stats" id="stats"></section>
+
+      <section class="grid">
+        <div class="card" id="tasks">
+          <div class="card-head">
+            <h3>All tasks</h3>
+            <div class="filters" id="filters">
+              <button class="filter active" data-filter="all">All</button>
+              <button class="filter" data-filter="todo">To do</button>
+              <button class="filter" data-filter="in_progress">In progress</button>
+              <button class="filter" data-filter="done">Done</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th class="hide-sm">Assignee</th>
+                  <th>Status</th>
+                  <th class="hide-sm">Priority</th>
+                  <th class="hide-sm">Due</th>
+                  <th class="actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="task-rows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="side-col">
+          <div class="card">
+            <div class="card-head"><h3>Overall progress</h3></div>
+            <div class="card-body" id="progress"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+
+      <!-- ================= USERS VIEW ================= -->
+      <div class="view" data-view-panel="users" hidden>
+        <section class="hero">
+          <div>
+            <h1>Users</h1>
+            <p>Manage who can sign in and what they're allowed to do.</p>
+          </div>
+          <button class="btn btn-primary" data-action="new-user"><i data-icon="user-plus"></i> Add user</button>
+        </section>
+
+        <section class="stats" id="user-stats"></section>
+
+        <section class="grid">
+          <div class="card">
+            <div class="card-head">
+              <h3>All users</h3>
+              <div class="filters" id="role-filters">
+                <button class="filter active" data-role-filter="all">All</button>
+                <button class="filter" data-role-filter="admin">Admins</button>
+                <button class="filter" data-role-filter="user">Users</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th class="hide-sm">Tasks</th>
+                    <th class="hide-sm">Joined</th>
+                    <th class="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="user-rows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="side-col">
+            <div class="card">
+              <div class="card-head"><h3>Roles &amp; permissions</h3></div>
+              <div class="card-body">
+                <p class="muted small">Each role receives these OAuth scopes in its access token.</p>
+                <div class="perm-table" id="perm-table"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================= REPORTS VIEW ================= -->
+      <div class="view" data-view-panel="reports" hidden>
+        <section class="hero">
+          <div>
+            <h1>Reports</h1>
+            <p id="report-subtitle">A live summary of every task.</p>
+          </div>
+          <button class="btn btn-ghost" id="report-refresh"><i data-icon="clock"></i> Refresh</button>
+        </section>
+
+        <section class="stats" id="report-stats"></section>
+
+        <section class="report-grid">
+          <div class="card">
+            <div class="card-head"><h3>Status breakdown</h3></div>
+            <div class="card-body" id="report-status"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>By priority</h3></div>
+            <div class="card-body" id="report-priority"></div>
+          </div>
+
+          <div class="card span-2">
+            <div class="card-head"><h3>By category</h3></div>
+            <div class="card-body" id="report-category"></div>
+          </div>
+
+          <div class="card span-2">
+            <div class="card-head"><h3>Workload by person</h3></div>
+            <div class="table-wrap" id="report-people"></div>
+          </div>
+
+          <div class="card span-2">
+            <div class="card-head"><h3>Overdue tasks</h3></div>
+            <div id="report-overdue"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== Create / edit task ===== -->
+  <dialog class="modal" id="task-dialog">
+    <form id="task-form" novalidate>
+      <div class="modal-head">
+        <h3 id="dialog-title">New task</h3>
+        <button type="button" class="icon-btn" data-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <label for="f-title">Title</label>
+        <input id="f-title" name="title" maxlength="200" required placeholder="What needs to be done?" />
+
+        <label for="f-description">Description</label>
+        <textarea id="f-description" name="description" rows="3" placeholder="Add some details (optional)"></textarea>
+
+        <div class="form-row">
+          <div>
+            <label for="f-status">Status</label>
+            <select id="f-status" name="status">
+              <option value="todo">To do</option>
+              <option value="in_progress">In progress</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+          <div>
+            <label for="f-priority">Priority</label>
+            <select id="f-priority" name="priority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="f-category">Category</label>
+        <select id="f-category" name="category">
+          <option value="general">General</option>
+          <option value="development">Development</option>
+          <option value="design">Design</option>
+          <option value="testing">Testing</option>
+          <option value="documentation">Documentation</option>
+        </select>
+
+        <div class="form-row">
+          <div>
+            <label for="f-due">Due date</label>
+            <input id="f-due" name="due_date" type="date" />
+          </div>
+          <div>
+            <label for="f-assignee">Assign to</label>
+            <select id="f-assignee" name="assigned_to"><option value="">Unassigned</option></select>
+          </div>
+        </div>
+
+        <p class="error" id="form-error" hidden></p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary" id="save-btn">Create task</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== Delete confirmation ===== -->
+  <dialog class="modal modal-sm" id="confirm-dialog">
+    <div class="modal-body confirm">
+      <div class="confirm-icon"><i data-icon="trash"></i></div>
+      <h3>Delete task?</h3>
+      <p class="muted" id="confirm-text"></p>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
+    </div>
+  </dialog>
+
+  <!-- ===== Add / edit user ===== -->
+  <dialog class="modal" id="user-dialog">
+    <form id="user-form" novalidate>
+      <div class="modal-head">
+        <h3 id="user-dialog-title">Add user</h3>
+        <button type="button" class="icon-btn" data-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <label for="u-username">Username</label>
+        <input id="u-username" name="username" maxlength="80" autocomplete="off" placeholder="e.g. priya.k" />
+
+        <label for="u-email">Email</label>
+        <input id="u-email" name="email" type="email" maxlength="120" autocomplete="off" placeholder="name@company.com" />
+
+        <div class="form-row">
+          <div>
+            <label for="u-role">Role</label>
+            <select id="u-role" name="role">
+              <option value="user">User (read only)</option>
+              <option value="admin">Admin (full access)</option>
+            </select>
+          </div>
+          <div>
+            <label for="u-password" id="u-password-label">Password</label>
+            <input id="u-password" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
+          </div>
+        </div>
+        <p class="hint" id="u-password-hint" hidden>Leave the password empty to keep the current one.</p>
+
+        <p class="error" id="user-form-error" hidden></p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary" id="user-save-btn">Add user</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== Delete user confirmation ===== -->
+  <dialog class="modal modal-sm" id="user-confirm-dialog">
+    <div class="modal-body confirm">
+      <div class="confirm-icon"><i data-icon="trash"></i></div>
+      <h3>Delete user?</h3>
+      <p class="muted" id="user-confirm-text"></p>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+      <button type="button" class="btn btn-danger" id="user-confirm-delete">Delete</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/users.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>

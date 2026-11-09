@@ -1,0 +1,19 @@
+# Secrets - never commit (use backend/.env.example as the template)
+.env
+*.env
+!.env.example
+
+# Python virtual environment and caches
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
